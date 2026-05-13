@@ -5,18 +5,17 @@ import time
 def cache_for(*, seconds: int):
     def wrapper(func: Callable):
         cache = {}
-        last_time = {}
 
         def inner(*args, **kwargs):
-            if args not in last_time or time.time() - last_time[args] > seconds:
+            key = (args, tuple(sorted(kwargs.items())))
+            if key not in cache or time.time() - cache[key][1] > seconds:
                 res = func(*args, **kwargs)
-                cache[args] = res
-                last_time[args] = time.time()
+                cache[key] = [res, time.time()]
                 print("run")
                 return res
             else:
                 print("cache")
-                return cache[args]
+                return cache[key][0]
 
         return inner
     return wrapper
